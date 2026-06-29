@@ -1,0 +1,16 @@
+export const CATEGORY_MAP = {
+    sightseeing:    { bg: "#ead2f9", color: "#cf3dff", emoji: "🗽" },
+    museum:         { bg: "#f1dabe", color: "#ffa33d", emoji: "🏛️" },
+    art:            { bg: "#f7e5e8", color: "#df5d84", emoji: "🎨" },
+    culture:        { bg: "#d9d0fb", color: "#704def", emoji: "🪇" },
+    dining:         { bg: "#c0ccf1", color: "#5071d8", emoji: "🍽️" },
+    drinks:         { bg: "#faccdf", color: "#cd145f", emoji: "🍷" },
+    entertainment:  { bg: "#e8fcc4", color: "#4f8a00", emoji: "🤹‍♂️" },
+    shopping:       { bg: "#fffdc2", color: "#a87b00", emoji: "🛍️" },
+    nature:         { bg: "#c9f7ca", color: "#19b31a", emoji: "🏔" },
+    beach:          { bg: "#dee4fc", color: "#1239d8", emoji: "🏖️" },
+    adventure:      { bg: "#fcdee5", color: "#fd7421", emoji: "🎢" },
+    fitness:        { bg: "#fcd9fc", color: "#e910ea", emoji: "🏋️‍♀️" },
+    transportation: { bg: "#c2dbe5", color: "#478da9", emoji: "✈️" },
+    accommodation:  { bg: "#f0c3c3", color: "#EA9698", emoji: "🏠" },
+};
