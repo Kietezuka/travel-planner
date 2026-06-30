@@ -85,7 +85,7 @@ export default function GuestTripImportBanner() {
                         onClick={handleImport}
                         disabled={isImporting}
                     >
-                        {isImporting ? "Saving..." : "Save to my account"}
+                        {isImporting ? "Saving..." : "Save"}
                     </button>
                     <button
                         type="button"

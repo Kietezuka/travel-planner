@@ -153,28 +153,41 @@ body {
   color: var(--color-text);
   background: var(--color-bg);
   font-family: var(--font-main);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* keyboard users can jump straight past the header */
 .skip-link{
   position: absolute;
   top: -100%;
-  left: var(--px-base);
+  left: var(--space-16);
   z-index: 9999;
-  padding: var(--px-xxs) var(--px-base);
+  padding: var(--space-12) var(--space-16);
   background-color: var(--color-primary-text);
   color: #fff;
-  font-size: var(--px-base);
+  font-size: var(--space-16);
   font-weight: 700;
-  border-radius: 0 0 var(--px-xxxxs) var(--px-xxxxs);
+  border-radius: 0 0 var(--space-8) var(--space-8);
 }
 .skip-link:focus{
   top: 0;
 }
 
+.app-top,
+.footer {
+  flex-shrink: 0;
+}
+#main-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
 main {
-  min-height: calc(100vh - var(--header-height-pc));
-  padding: var(--px-xxlg);
+  flex: 1 0 auto;
+  padding: var(--space-28);
 }
 
 /* Assign the MD3 type scale to the headline and body text
@@ -218,6 +231,6 @@ a {
   }
   
   h2{
-    font-size: var(--px-xlg);
+    font-size: var(--space-18);
   }
 }
