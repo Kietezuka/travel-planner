@@ -15,23 +15,28 @@ import {
 async function requireTripOwner(tripId) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return null;
-  const trip = db.prepare('SELECT userId FROM trips WHERE id = ?').get(tripId);
+  const trip = (await db.execute({
+    sql: 'SELECT userId FROM trips WHERE id = ?',
+    args: [tripId],
+  })).rows[0];
   if (!trip || Number(trip.userId) !== Number(session.user.id)) return null;
   return session;
 }
 
 // The server is the source of truth for overlaps — client checks are UX only.
-function findServerOverlap(tripId, activity, excludeId = null) {
-  const existing = db.prepare(
-    'SELECT id, title, startTime, endTime FROM activities WHERE tripId = ? AND date = ?'
-  ).all(tripId, activity.date);
+async function findServerOverlap(tripId, activity, excludeId = null) {
+  const existing = (await db.execute({
+    sql: 'SELECT id, title, startTime, endTime FROM activities WHERE tripId = ? AND date = ?',
+    args: [tripId, activity.date],
+  })).rows;
   return findOverlappingActivity(existing, activity.startTime, activity.endTime, excludeId);
 }
 
-function findServerAccommodationOverlap(tripId, acc, excludeId = null) {
-  const existing = db.prepare(
-    'SELECT id, title, checkinDate, checkinTime, checkoutDate, checkoutTime FROM accommodations WHERE tripId = ?'
-  ).all(tripId);
+async function findServerAccommodationOverlap(tripId, acc, excludeId = null) {
+  const existing = (await db.execute({
+    sql: 'SELECT id, title, checkinDate, checkinTime, checkoutDate, checkoutTime FROM accommodations WHERE tripId = ?',
+    args: [tripId],
+  })).rows;
   const newCheckin = `${acc.checkinDate}T${acc.checkinTime || "00:00"}`;
   const newCheckout = `${acc.checkoutDate}T${acc.checkoutTime || "00:00"}`;
   return findOverlappingAccommodation(existing, newCheckin, newCheckout, excludeId);
@@ -61,14 +66,15 @@ export async function createTripAction(formData) {
       console.error("User ID is missing from session!");
       return { success: false, error: "User session error." };
     }
-    const stmt = db.prepare(`
+    const info = await db.execute({
+      sql: `
       INSERT INTO trips (destination, userId, startDate, endDate)
       VALUES (?, ?, ?, ?)
-    `);
+    `,
+      args: [destination, Number(userId), startDate, endDate],
+    });
 
-    const info = stmt.run(destination, Number(userId), startDate, endDate);
-
-    newTripId = info.lastInsertRowid;
+    newTripId = Number(info.lastInsertRowid);
   } catch(error){
     console.error("DATABASE ERROR:", error.message);
     return { success: false, error: "Failed to create the trip. Please try again." };
@@ -92,57 +98,66 @@ export async function importGuestTripAction(guestTrip) {
     return { success: false, error: validationError };
   }
 
+  const tx = await db.transaction("write");
   try {
-    let newTripId;
-    db.transaction(() => {
-      const info = db.prepare(`
+    const info = await tx.execute({
+      sql: `
         INSERT INTO trips (destination, userId, startDate, endDate)
         VALUES (?, ?, ?, ?)
-      `).run(destination, Number(session.user.id), startDate, endDate);
-      newTripId = info.lastInsertRowid;
+      `,
+      args: [destination, Number(session.user.id), startDate, endDate],
+    });
+    const newTripId = Number(info.lastInsertRowid);
 
-      const insertActivity = db.prepare(`
-        INSERT INTO activities (tripId, title, date, startTime, endTime, address, category, memo, lat, lon)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-      const insertMemo = db.prepare(`
-        INSERT INTO day_memos (tripId, date, memo)
-        VALUES (?, ?, ?)
-        ON CONFLICT(tripId, date) DO UPDATE SET memo = excluded.memo
-      `);
-      for (const day of (guestTrip.daysData || [])) {
-        for (const a of (day.activities || [])) {
-          if (!a?.title || !a?.startTime || !a?.endTime) continue;
-          insertActivity.run(
+    const activitySql = `
+      INSERT INTO activities (tripId, title, date, startTime, endTime, address, category, memo, lat, lon)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    const memoSql = `
+      INSERT INTO day_memos (tripId, date, memo)
+      VALUES (?, ?, ?)
+      ON CONFLICT(tripId, date) DO UPDATE SET memo = excluded.memo
+    `;
+    for (const day of (guestTrip.daysData || [])) {
+      for (const a of (day.activities || [])) {
+        if (!a?.title || !a?.startTime || !a?.endTime) continue;
+        await tx.execute({
+          sql: activitySql,
+          args: [
             newTripId, a.title, a.date || day.date, a.startTime, a.endTime,
             a.address || "", a.category || "sightseeing", a.memo || "",
-            a.lat ? Number(a.lat) : null, a.lon ? Number(a.lon) : null
-          );
-        }
-        if (day.memo) insertMemo.run(newTripId, day.date, day.memo);
+            a.lat ? Number(a.lat) : null, a.lon ? Number(a.lon) : null,
+          ],
+        });
       }
+      if (day.memo) await tx.execute({ sql: memoSql, args: [newTripId, day.date, day.memo] });
+    }
 
-      const insertAccommodation = db.prepare(`
-        INSERT INTO accommodations (
-          tripId, title, checkinDate, checkinTime,
-          checkoutDate, checkoutTime, address, lat, lon, memo
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-      for (const acc of (guestTrip.accommodations || [])) {
-        if (!acc?.title || !acc?.checkinDate || !acc?.checkoutDate) continue;
-        insertAccommodation.run(
+    const accommodationSql = `
+      INSERT INTO accommodations (
+        tripId, title, checkinDate, checkinTime,
+        checkoutDate, checkoutTime, address, lat, lon, memo
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    for (const acc of (guestTrip.accommodations || [])) {
+      if (!acc?.title || !acc?.checkinDate || !acc?.checkoutDate) continue;
+      await tx.execute({
+        sql: accommodationSql,
+        args: [
           newTripId, acc.title, acc.checkinDate, acc.checkinTime || "15:00",
           acc.checkoutDate, acc.checkoutTime || "10:00", acc.address || "",
           acc.lat ? Number(acc.lat) : null, acc.lon ? Number(acc.lon) : null,
-          acc.memo || ""
-        );
-      }
-    })();
+          acc.memo || "",
+        ],
+      });
+    }
 
+    await tx.commit();
     revalidatePath('/');
     return { success: true, id: String(newTripId) };
   } catch (error) {
+    await tx.rollback();
     console.error("Guest trip import error:", error);
     return { success: false, error: "Failed to import your guest plan." };
   }
@@ -154,12 +169,14 @@ export async function saveDayMemoAction(tripId, date, memo) {
     return { success: false, error: "Unauthorized" };
   }
   try {
-    const stmt = db.prepare(`
+    await db.execute({
+      sql: `
       INSERT INTO day_memos (tripId, date, memo)
       VALUES (?, ?, ?)
       ON CONFLICT(tripId, date) DO UPDATE SET memo = excluded.memo
-    `);
-    stmt.run(tripId, date, memo);
+    `,
+      args: [tripId, date, memo],
+    });
     revalidatePath(`/trips/${tripId}/weekly/${date}`);
     return { success: true };
   } catch (error) {
@@ -176,33 +193,34 @@ export async function createActivityAction(tripId, activityData) {
   if (validationError) {
     return { success: false, error: validationError };
   }
-  const conflict = findServerOverlap(tripId, activityData);
+  const conflict = await findServerOverlap(tripId, activityData);
   if (conflict) {
     return { success: false, error: `Overlaps with "${conflict.title ?? "another activity"}" (${conflict.startTime}–${conflict.endTime}).` };
   }
   try {
     const { title, date, startTime, endTime, address, category = 'sightseeing', memo, lat, lon } = activityData;
-    const stmt = db.prepare(`
+    const info = await db.execute({
+      sql: `
       INSERT INTO activities (tripId, title, date, startTime, endTime, address, category, memo, lat, lon)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-  const info = stmt.run(
-    tripId,
-    title,
-    date,
-    startTime,
-    endTime,
-    address,
-    category,
-    memo,
-    lat ? Number(lat) : null,
-    lon ? Number(lon) : null
-  );
+    `,
+      args: [
+        tripId,
+        title,
+        date,
+        startTime,
+        endTime,
+        address,
+        category,
+        memo,
+        lat ? Number(lat) : null,
+        lon ? Number(lon) : null,
+      ],
+    });
 
   revalidatePath(`/trips/${tripId}/weekly`);
   revalidatePath(`/trips/${tripId}/weekly/${date}`);
-  return { success: true, id: info.lastInsertRowid };
+  return { success: true, id: Number(info.lastInsertRowid) };
   } catch(error){
     return { success: false, error: error.message }
   }
@@ -217,14 +235,15 @@ export async function updateActivityAction(tripId, activityData) {
   if (validationError) {
     return { success: false, error: validationError };
   }
-  const conflict = findServerOverlap(tripId, activityData, activityData.id);
+  const conflict = await findServerOverlap(tripId, activityData, activityData.id);
   if (conflict) {
     return { success: false, error: `Overlaps with "${conflict.title ?? "another activity"}" (${conflict.startTime}–${conflict.endTime}).` };
   }
   try {
     const { id, title, date, startTime, endTime, address, category = 'sightseeing', memo, lat, lon } = activityData;
 
-    const stmt = db.prepare(`
+    const info = await db.execute({
+      sql: `
       UPDATE activities
       SET title = ?,
           date = ?,
@@ -236,23 +255,23 @@ export async function updateActivityAction(tripId, activityData) {
           lat = ?,
           lon = ?
       WHERE id = ? AND tripId = ?
-    `);
+    `,
+      args: [
+        title,
+        date,
+        startTime,
+        endTime,
+        address,
+        category,
+        memo,
+        lat ? Number(lat) : null,
+        lon ? Number(lon) : null,
+        id,
+        tripId,
+      ],
+    });
 
-    const info = stmt.run(
-      title,
-      date,
-      startTime,
-      endTime,
-      address,
-      category,
-      memo,
-      lat ? Number(lat) : null,
-      lon ? Number(lon) : null,
-      id,
-      tripId
-    );
-
-    if (info.changes === 0) {
+    if (info.rowsAffected === 0) {
       return { success: false, error: "Activity not found" };
     }
 
@@ -270,10 +289,12 @@ export async function deleteActivityAction(tripId, activityId){
     return { success: false, error: "Unauthorized" };
   }
   try{
-    const stmt = db.prepare('DELETE FROM activities WHERE id = ? AND tripId = ?');
-    const result = stmt.run(activityId, tripId);
+    const result = await db.execute({
+      sql: 'DELETE FROM activities WHERE id = ? AND tripId = ?',
+      args: [activityId, tripId],
+    });
 
-    if(result.changes === 0){
+    if(result.rowsAffected === 0){
       throw new Error("Activity not found or already deleted");
     }
 
@@ -294,46 +315,47 @@ export async function createAccommodationAction(tripId, accommodationData) {
   if (validationError) {
     return { success: false, error: validationError };
   }
-  const conflict = findServerAccommodationOverlap(tripId, accommodationData);
+  const conflict = await findServerAccommodationOverlap(tripId, accommodationData);
   if (conflict) {
     return { success: false, error: `These dates overlap with "${conflict.title}" (${conflict.checkinDate} → ${conflict.checkoutDate}).` };
   }
   try{
     const {
       title,
-      checkinDate, 
-      checkinTime, 
-      checkoutDate, 
-      checkoutTime, 
-      address, 
-      memo,
-      lat,
-      lon,
-    } = accommodationData;
-
-    const stmt = db.prepare(`
-      INSERT INTO accommodations (
-        tripId, title, checkinDate, checkinTime, 
-        checkoutDate, checkoutTime, address, lat, lon, memo
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const info = stmt.run(
-      tripId,
-      title,
       checkinDate,
       checkinTime,
       checkoutDate,
       checkoutTime,
       address,
-      lat ? Number(lat) : null,
-      lon ? Number(lon) : null,
-      memo
-    );
+      memo,
+      lat,
+      lon,
+    } = accommodationData;
+
+    const info = await db.execute({
+      sql: `
+      INSERT INTO accommodations (
+        tripId, title, checkinDate, checkinTime,
+        checkoutDate, checkoutTime, address, lat, lon, memo
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+      args: [
+        tripId,
+        title,
+        checkinDate,
+        checkinTime,
+        checkoutDate,
+        checkoutTime,
+        address,
+        lat ? Number(lat) : null,
+        lon ? Number(lon) : null,
+        memo,
+      ],
+    });
 
     revalidatePath(`/trips/${tripId}/`, 'layout');
-    return { success: true, id: info.lastInsertRowid };
+    return { success: true, id: Number(info.lastInsertRowid) };
   } catch (error) {
     console.error("Database insert error (accommodation):", error);
     return { success: false, error: error.message };
@@ -349,42 +371,43 @@ export async function updateAccommodationAction(tripId, accommodationData) {
   if (validationError) {
     return { success: false, error: validationError };
   }
-  const conflict = findServerAccommodationOverlap(tripId, accommodationData, accommodationData.id);
+  const conflict = await findServerAccommodationOverlap(tripId, accommodationData, accommodationData.id);
   if (conflict) {
     return { success: false, error: `These dates overlap with "${conflict.title}" (${conflict.checkinDate} → ${conflict.checkoutDate}).` };
   }
   try {
     const { id, title, checkinDate, checkinTime, checkoutDate, checkoutTime, address, memo, lat, lon } = accommodationData;
-    
-    const stmt = db.prepare(`
-      UPDATE accommodations 
-      SET title = ?, 
+
+    const info = await db.execute({
+      sql: `
+      UPDATE accommodations
+      SET title = ?,
           checkinDate = ?,
-          checkinTime = ?, 
-          checkoutDate = ?, 
+          checkinTime = ?,
+          checkoutDate = ?,
           checkoutTime = ?,
-          address = ?, 
+          address = ?,
           memo = ?,
           lat = ?,
           lon = ?
       WHERE id = ? AND tripId = ?
-    `);
+    `,
+      args: [
+        title,
+        checkinDate,
+        checkinTime,
+        checkoutDate,
+        checkoutTime,
+        address,
+        memo,
+        lat ? Number(lat) : null,
+        lon ? Number(lon) : null,
+        id,
+        tripId,
+      ],
+    });
 
-    const info = stmt.run(
-      title,
-      checkinDate,
-      checkinTime,
-      checkoutDate,
-      checkoutTime,
-      address,
-      memo,
-      lat ? Number(lat) : null,
-      lon ? Number(lon) : null,
-      id,
-      tripId
-    );
-
-    if (info.changes === 0) {
+    if (info.rowsAffected === 0) {
       return { success: false, error: "Accommodation not found" };
     }
 
@@ -401,13 +424,20 @@ export async function deleteTripAction(tripId) {
   if (!await requireTripOwner(tripId)) {
     return { success: false, error: "Unauthorized" };
   }
+  // libSQL over HTTP can't rely on `PRAGMA foreign_keys = ON` persisting across
+  // requests, so delete child rows explicitly inside a transaction instead of
+  // depending on ON DELETE CASCADE.
+  const tx = await db.transaction("write");
   try {
-    // Child rows (day_memos / activities / accommodations) are removed by
-    // ON DELETE CASCADE. Requires foreign_keys = ON, set in lib/db.js.
-    db.prepare('DELETE FROM trips WHERE id = ?').run(tripId);
+    await tx.execute({ sql: 'DELETE FROM activities WHERE tripId = ?', args: [tripId] });
+    await tx.execute({ sql: 'DELETE FROM day_memos WHERE tripId = ?', args: [tripId] });
+    await tx.execute({ sql: 'DELETE FROM accommodations WHERE tripId = ?', args: [tripId] });
+    await tx.execute({ sql: 'DELETE FROM trips WHERE id = ?', args: [tripId] });
+    await tx.commit();
     revalidatePath('/');
     return { success: true };
   } catch (error) {
+    await tx.rollback();
     return { success: false, error: error.message };
   }
 }
@@ -418,13 +448,19 @@ export async function deleteAllTripsAction() {
   if (!session?.user?.id) {
     return { success: false, error: "Unauthorized" };
   }
+  const userId = Number(session.user.id);
+  // Explicit cascade (see deleteTripAction for why CASCADE isn't relied on).
+  const tx = await db.transaction("write");
   try {
-    const userId = Number(session.user.id);
-    // Children cascade-delete via ON DELETE CASCADE (foreign_keys = ON in lib/db.js).
-    db.prepare('DELETE FROM trips WHERE userId = ?').run(userId);
+    await tx.execute({ sql: 'DELETE FROM activities WHERE tripId IN (SELECT id FROM trips WHERE userId = ?)', args: [userId] });
+    await tx.execute({ sql: 'DELETE FROM day_memos WHERE tripId IN (SELECT id FROM trips WHERE userId = ?)', args: [userId] });
+    await tx.execute({ sql: 'DELETE FROM accommodations WHERE tripId IN (SELECT id FROM trips WHERE userId = ?)', args: [userId] });
+    await tx.execute({ sql: 'DELETE FROM trips WHERE userId = ?', args: [userId] });
+    await tx.commit();
     revalidatePath('/');
     return { success: true };
   } catch (error) {
+    await tx.rollback();
     return { success: false, error: error.message };
   }
 }
@@ -435,10 +471,12 @@ export async function deleteAccommodationAction(tripId, accommodationId) {
     return { success: false, error: "Unauthorized" };
   }
   try {
-    const stmt = db.prepare('DELETE FROM accommodations WHERE id = ? AND tripId = ?');
-    const result = stmt.run(accommodationId, tripId);
+    const result = await db.execute({
+      sql: 'DELETE FROM accommodations WHERE id = ? AND tripId = ?',
+      args: [accommodationId, tripId],
+    });
 
-    if (result.changes === 0) {
+    if (result.rowsAffected === 0) {
       throw new Error("Accommodation not found or already deleted");
     }
 

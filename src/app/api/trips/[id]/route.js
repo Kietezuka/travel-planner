@@ -14,8 +14,11 @@ export async function GET(request, { params }) {
     const date = searchParams.get('date');
 
     // 3. Fetch the trip
-    const trip = db.prepare('SELECT * FROM trips WHERE id = ?').get(id);
-    
+    const trip = (await db.execute({
+        sql: 'SELECT * FROM trips WHERE id = ?',
+        args: [id],
+    })).rows[0];
+
     if (!trip) {
         return NextResponse.json({ error: "Trip not found" }, { status: 404 });
     }
@@ -28,19 +31,31 @@ export async function GET(request, { params }) {
     }
 
     // 5. Fetch linked data
-    const accommodations = db.prepare('SELECT * FROM accommodations WHERE tripId = ?').all(id) || [];
+    const accommodations = (await db.execute({
+        sql: 'SELECT * FROM accommodations WHERE tripId = ?',
+        args: [id],
+    })).rows;
 
     let activities;
     let dayMemo = "";
 
     if (date) {
         // Specific day view
-        activities = db.prepare('SELECT * FROM activities WHERE tripId = ? AND date = ?').all(id, date);
-        const memoRow = db.prepare('SELECT memo FROM day_memos WHERE tripId = ? AND date = ?').get(id, date);
+        activities = (await db.execute({
+            sql: 'SELECT * FROM activities WHERE tripId = ? AND date = ?',
+            args: [id, date],
+        })).rows;
+        const memoRow = (await db.execute({
+            sql: 'SELECT memo FROM day_memos WHERE tripId = ? AND date = ?',
+            args: [id, date],
+        })).rows[0];
         dayMemo = memoRow ? memoRow.memo : "";
     } else {
         // Weekly view
-        activities = db.prepare('SELECT * FROM activities WHERE tripId = ?').all(id);
+        activities = (await db.execute({
+            sql: 'SELECT * FROM activities WHERE tripId = ?',
+            args: [id],
+        })).rows;
     }
 
     return NextResponse.json({ 

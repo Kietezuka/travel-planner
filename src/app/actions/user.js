@@ -17,10 +17,16 @@ export async function updateProfileAction(formData) {
 
     validateEmail(email);
 
-    const existing = db.prepare("SELECT id FROM users WHERE email = ? AND id != ?").get(email, session.user.id);
+    const existing = (await db.execute({
+        sql: "SELECT id FROM users WHERE email = ? AND id != ?",
+        args: [email, session.user.id],
+    })).rows[0];
     if (existing) throw new Error("Email already in use by another account");
 
-    db.prepare("UPDATE users SET name = ?, email = ? WHERE id = ?").run(name, email, session.user.id);
+    await db.execute({
+        sql: "UPDATE users SET name = ?, email = ? WHERE id = ?",
+        args: [name, email, session.user.id],
+    });
 
     return { success: true };
 }
@@ -37,14 +43,20 @@ export async function updatePasswordAction(formData) {
     if (newPassword !== confirmPassword) throw new Error("New passwords do not match");
     validatePassword(newPassword);
 
-    const user = db.prepare("SELECT password FROM users WHERE id = ?").get(session.user.id);
+    const user = (await db.execute({
+        sql: "SELECT password FROM users WHERE id = ?",
+        args: [session.user.id],
+    })).rows[0];
     if (!user) throw new Error("User not found");
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) throw new Error("Current password is incorrect");
 
     const hashed = await bcrypt.hash(newPassword, 10);
-    db.prepare("UPDATE users SET password = ? WHERE id = ?").run(hashed, session.user.id);
+    await db.execute({
+        sql: "UPDATE users SET password = ? WHERE id = ?",
+        args: [hashed, session.user.id],
+    });
 
     return { success: true };
 }
@@ -57,16 +69,30 @@ export async function deleteAccountAction(formData) {
     if (!password) throw new Error("Password is required to delete your account");
 
     const userId = Number(session.user.id);
-    const user = db.prepare("SELECT password FROM users WHERE id = ?").get(userId);
+    const user = (await db.execute({
+        sql: "SELECT password FROM users WHERE id = ?",
+        args: [userId],
+    })).rows[0];
     if (!user) throw new Error("User not found");
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new Error("Password is incorrect");
 
-    // Deleting the user cascades to their trips, then to each trip's children
-    // (day_memos / activities / accommodations) via ON DELETE CASCADE.
-    // Requires foreign_keys = ON, set in lib/db.js.
-    db.prepare("DELETE FROM users WHERE id = ?").run(userId);
+    // Delete the user and everything under it (trips -> day_memos / activities /
+    // accommodations). Done explicitly in a transaction because libSQL over HTTP
+    // can't rely on `PRAGMA foreign_keys = ON` / ON DELETE CASCADE persisting.
+    const tx = await db.transaction("write");
+    try {
+        await tx.execute({ sql: "DELETE FROM activities WHERE tripId IN (SELECT id FROM trips WHERE userId = ?)", args: [userId] });
+        await tx.execute({ sql: "DELETE FROM day_memos WHERE tripId IN (SELECT id FROM trips WHERE userId = ?)", args: [userId] });
+        await tx.execute({ sql: "DELETE FROM accommodations WHERE tripId IN (SELECT id FROM trips WHERE userId = ?)", args: [userId] });
+        await tx.execute({ sql: "DELETE FROM trips WHERE userId = ?", args: [userId] });
+        await tx.execute({ sql: "DELETE FROM users WHERE id = ?", args: [userId] });
+        await tx.commit();
+    } catch (error) {
+        await tx.rollback();
+        throw error;
+    }
 
     return { success: true };
 }

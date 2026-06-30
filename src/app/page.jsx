@@ -12,8 +12,10 @@ export default async function Home() {
     let userTrips = [];
 
     if(session){
-        userTrips = db.prepare("SELECT * FROM trips WHERE userId = ? ORDER BY startDate DESC")
-                       .all(session.user.id);
+        userTrips = (await db.execute({
+            sql: "SELECT * FROM trips WHERE userId = ? ORDER BY startDate DESC",
+            args: [session.user.id],
+        })).rows;
     }
 
     return (

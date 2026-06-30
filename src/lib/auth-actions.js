@@ -26,14 +26,18 @@ export async function signupAction(formData) {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
-    const stmt = db.prepare(
-      "INSERT INTO users (email, password, name) VALUES (?, ?, ?)"
-    );
-    stmt.run(email, hashedPassword, userName);
+    await db.execute({
+      sql: "INSERT INTO users (email, password, name) VALUES (?, ?, ?)",
+      args: [email, hashedPassword, userName],
+    });
   } catch (error) {
     // Rely on the Database UNIQUE(email) constraint instead of a pre-SELECT,
     // which would have a race condition between check and insert.
-    if (error.message.includes("UNIQUE constraint failed")) {
+    if (
+      error.message?.includes("UNIQUE constraint failed") ||
+      error.code === "SQLITE_CONSTRAINT_UNIQUE" ||
+      error.code?.includes("CONSTRAINT")
+    ) {
       throw new Error("Email already exists");
     }
     console.error("Signup Error:", error);

@@ -46,7 +46,10 @@ export const authOptions = {
         const email = credentials.email.trim().toLowerCase();
         if (isRateLimited(email)) return null;
 
-        const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
+        const user = (await db.execute({
+          sql: "SELECT * FROM users WHERE email = ?",
+          args: [email],
+        })).rows[0];
 
         // Always run a compare so "unknown email" and "wrong password"
         // take the same time.
@@ -79,7 +82,10 @@ export const authOptions = {
 
       if (trigger === "update") {
         // Re-fetch latest name/email from Database after profile update
-        const freshUser = db.prepare("SELECT name, email FROM users WHERE id = ?").get(Number(token.id));
+        const freshUser = (await db.execute({
+          sql: "SELECT name, email FROM users WHERE id = ?",
+          args: [Number(token.id)],
+        })).rows[0];
         if (!freshUser) {
           token.invalid = true;
         } else {
@@ -90,7 +96,10 @@ export const authOptions = {
       }
 
       // Invalidate tokens whose account no longer exists (deleted account)
-      const exists = db.prepare("SELECT id FROM users WHERE id = ?").get(Number(token.id));
+      const exists = (await db.execute({
+        sql: "SELECT id FROM users WHERE id = ?",
+        args: [Number(token.id)],
+      })).rows[0];
       if (!exists) token.invalid = true;
       return token;
     },
