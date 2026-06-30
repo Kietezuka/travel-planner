@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # lock を生成したのと同じ npm バージョンに固定する
+      # (npm のバージョンが違うと @emnapi 等 caret 範囲の解決がずれ npm ci が失敗する)
+      - run: npm i -g npm@11.6.2
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+        env:
+          NEXTAUTH_SECRET: ci-build-only-secret
