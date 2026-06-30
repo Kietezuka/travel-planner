@@ -1,0 +1,541 @@
+/* ==================================================================
+    Home Page & Weekly Page & DaySchedule Page Shared Modal Components 
+===================================================================== */
+
+/* -------------------------------
+    SearchLocationBar Component
+---------------------------------- */
+.search-location__wrapper{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.result-text-wrapper > strong{
+  margin-right: var(--space-10);
+}
+.result-list{
+  position: absolute;
+  top: 100%;
+  left: 0;
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
+  background-color: white;
+  z-index: var(--z-dropdown);
+  width: 100%;
+  max-height: 25rem;
+  overflow-y: auto;
+  list-style: none;
+}
+.result-list_item{
+  line-height: 1.5;
+  padding: var(--space-8) 0;
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-10);
+  align-items: center;
+  cursor: pointer;
+  font-size: var(--space-16);
+}
+.result-list_item.is-active {
+  background-color: var(--border-sub);
+}
+@media (hover: hover) {
+  .result-list_item:hover {
+    background-color: var(--border-sub);
+  }
+}
+
+.loading-message{
+  padding-top: 0.8rem;
+  font-size: var(--space-16);
+}
+.search-no-results {
+  padding: var(--space-16);
+  font-size: var(--space-16);
+  color: var(--color-muted);
+  text-align: center;
+}
+
+/* ==================================================================
+    Weekly Page & DaySchedule Page Shared Modal Components 
+===================================================================== */
+
+/* -----------------------------------------------------
+  Weekly Page & DaySchedule Page Shared Modal Components
+  - AddActivityModal Component
+  - AddAccommodationModalComponent
+  - ActivityDetailModal Component
+  - AccommodationDetailModal Component
+-------------------------------------------------------- */
+@keyframes slideUp {
+  from {
+    transform: translateY(2rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.travel-modal{
+  background: var(--color-bg-card);
+  border-radius: var(--shape-xl);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease-out;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: var(--z-modal);
+}
+
+.travel-modal-overlay{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: var(--z-overlay);
+}
+
+.travel-modal__header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-24) var(--space-24) var(--space-16);
+  border-bottom: 1px solid var(--border-sub);
+}
+
+.travel-modal__close{
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: var(--color-muted);
+  cursor: pointer;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+@media (hover: hover) {
+  .travel-modal__close:hover{
+    background: var(--color-bg-3);
+    color: var(--color-text);
+  }
+}
+.travel-modal__form{
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+  padding: var(--space-24);
+}
+
+.travel-modal__field{
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: start;
+  justify-content: end;
+}
+
+.travel-modal__field--half{
+  width: 100%;
+  align-items: center;
+}
+
+.travel-modal__label{
+  font-size: var(--space-16);
+}
+.time-picker{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 5.8rem;
+  box-sizing: border-box;
+  font-weight: 700;
+  gap: var(--space-8);
+  background-color: var(--color-bg-3);
+  border: 0.1rem solid var(--border-normal);
+  border-radius: var(--shape-xs);
+  padding: 0 var(--space-10);
+}
+
+.time-picker--error{
+  border-color: var(--color-error);
+}
+
+.time-picker--readonly{
+  background-color: transparent;
+  font-size: var(--space-16);
+}
+
+.datetime__wrapper .time-picker--readonly{
+  flex: 1;
+  padding: var(--space-16);
+  font-size: var(--space-16);
+}
+
+.time-picker__unit{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 0;
+}
+
+.time-picker__btn{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 5.8rem;
+  height: 1.4rem;
+  color: var(--color-muted);
+  border-radius: 0.4rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+@media (hover: hover) {
+  .time-picker__btn:hover{
+    background: var(--border-sub);
+    color: var(--color-text);
+    opacity: 1;
+  }
+}
+
+.time-picker__value{
+  font-size: var(--space-24);
+  font-weight: 700;
+  color: var(--color-text);
+  min-width: 2.8rem;
+  text-align: center;
+  line-height: 1;
+}
+
+select.time-picker__value{
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  text-align: center;
+  text-align-last: center;
+  padding: 0;
+  cursor: pointer;
+}
+
+select.time-picker__value:focus-visible{
+  outline: 0.2rem solid var(--color-primary);
+  outline-offset: 0.1rem;
+  border-radius: 0.4rem;
+}
+
+.time-picker__colon{
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  line-height: 1;
+  align-self: center;
+  padding-bottom: 0.2rem;
+}
+
+.travel-modal__textarea{
+    width: 100%;
+    padding: var(--space-16);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--space-8);
+    font-size: var(--space-16);
+    color: var(--color-text);
+    transition: border-color 0.2s ease;
+    resize: none;
+}
+.travel-modal__textarea:focus{
+  border-color: var(--color-primary);
+  outline: none;
+}
+.travel-modal__actions{
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-16);
+  justify-content: end;
+  margin: var(--space-32);
+}
+
+/* MOBILE (≤ 640px) */
+@media (max-width: 640px) {
+  .travel-modal {
+    padding: 0;
+  }
+
+  .travel-modal__header {
+    padding: var(--space-24) var(--space-10) var(--space-16);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--color-bg-card);
+  }
+
+  .travel-modal__form {
+    padding: var(--space-16);
+    gap: var(--space-16);
+  }
+
+  .travel-modal__actions {
+    margin: var(--space-16) 0 0;
+  }
+
+  .time-picker {
+    padding: var(--space-8);
+  }
+
+  .time-picker__btn {
+    width: 4rem;
+  }
+
+  .time-picker__value {
+    font-size: var(--space-18);
+    min-width: 2.2rem;
+  }
+
+  .time-picker__colon {
+    font-size: var(--space-18);
+  }
+
+  .day-list__add-label {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------
+  - AddActivityModal Component
+  - AddAccommodationModalComponent
+  - ActivityDetailModal Component
+  - AccommodationDetailModal Component
+  - SearchLocationBar Components
+---------------------------------------------------------- */
+.activity-modal__input{
+  border: 0.1rem solid var(--border-normal);
+  padding: var(--space-16);
+  border-radius: var(--space-8);
+  font-size: var(--space-16);
+  transition: border-color 0.2s ease;
+  text-overflow: ellipsis;
+}
+
+.activity-modal__input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+.activity-modal__input:not(:placeholder-shown) {
+  border-color: var(--color-primary);
+}
+
+
+/*---------------------------------
+    AddActivityModal Component 
+----------------------------------- */
+.activity-modal__category-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  padding: 4px;
+}
+
+.activity-modal__category-btn{
+  background: var(--color-bg);
+  border: 2px solid var(--border-sub);
+  border-radius: 10px;
+  padding: 12px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.activity-modal__category-btn.is-active{
+  background-color: var(--color-primary);
+  color: var(--md-on-primary);
+}
+
+.activity-modal__category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 10rem;
+  font-size: var(--space-14);
+  font-weight: var(--font-weight-strong);
+  text-transform: capitalize;
+}
+
+.activity-modal__category-emoji{
+  font-size: var(--space-28);
+}
+.activity-modal__category-label{
+  font-size: var(--space-16);
+  text-align: center;
+  font-weight: 600;
+}
+/* MOBILE (≤ 640px)*/
+@media (max-width: 640px) {
+  .activity-modal__category-grid{
+    grid-template-columns: repeat(auto-fill, minmax(86px, 1fr));
+  }
+  .activity-modal__category-label{
+    font-size: var(--space-10);
+  }
+}
+/*---------------------------------
+    ActivityDetailModal Component 
+----------------------------------- */
+.activity-detail-modal .travel-modal__form{
+  padding: var(--space-10);
+  margin-top: var(--space-24);
+}
+.activity-detail-modal-top{
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-24);
+  align-items: flex-start;
+}
+
+.activity-detail-modal-top__right{
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+/*---------------------------------
+  - AddActivityModal Component
+  - ActivityDetailModal Component 
+----------------------------------- */
+.activity-modal__time-group{
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+}
+
+.activity-modal__time-field{
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.activity-modal__time-middle{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--space-16);
+}
+.activity-modal__time-middle__spacer{
+  font-size: var(--space-18);
+  line-height: 1.15;
+  visibility: hidden;
+}
+.activity-modal__time-middle__sep{
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+
+/*---------------------------------------
+  - AccommodationDetailModal Component
+  - ActivityDetailModal Component 
+----------------------------------------- */
+.is-readonly{
+  border: 0.1rem solid transparent;
+  background: var(--md-surface-variant);
+  cursor: default;
+  color: var(--color-text);
+}
+
+.travel-modal__field-address{
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-16);
+  align-items: center;
+  color: var(--md-on-surface-variant);
+}
+
+.travel-modal__field-address .activity-modal__input{
+  width: 100%;
+}
+
+/*---------------------------------------
+  AccommodationDetailModal Component
+----------------------------------------- */
+.accommodation-detail-image__wrapper{
+  width: 100%;
+  height: 15rem;
+  border-radius: var(--space-16);
+  overflow: hidden;
+}
+.accommodation-detail-image{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+@media (max-width: 640px) {
+  .accommodation-detail-image__wrapper {
+    height: 10rem;
+  }
+}
+
+/*-----------------------------------------
+  - AddAccommodationDetailModal Component
+  - AccommodationDetailModal Component
+------------------------------------------- */
+.datetime__wrapper{
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-16);
+}
+.datetime__wrapper{
+  align-items: stretch;
+}
+.datetime__wrapper .activity-modal__input{
+  flex: 1;
+}
+.datetime__wrapper label{
+  text-align: start;
+}
+.datetime__svg{
+  margin: 0 auto;
+  color: var(--md-on-surface-variant);
+}
+
+/* MOBILE (≤ 640px)*/
+@media (max-width: 640px) {
+  .datetime__wrapper > .travel-modal__field {
+    flex: 1;
+  }
+  .datetime__wrapper .travel-modal__field--half {
+    flex: 0 0 auto;
+    width: auto;
+    align-items: flex-start;
+  }
+  .datetime__wrapper .time-picker {
+    width: 100%;
+  }
+}
+

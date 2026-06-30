@@ -1,0 +1,7 @@
+/* =========================================
+  DaySchedule Page > Map Component
+============================================ */
+.map-wrapper .leaflet-container{
+  border-radius: var(--space-16);
+}
+

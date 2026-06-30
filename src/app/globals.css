@@ -1,0 +1,31 @@
+/* ============================================================
+      globals.css - Style Manifest
+      The actual files are organized by function under the ./styles/ directory.
+      The order of @import directives determines the cascade order. Do not reorder them.
+   ============================================================ */
+
+/* --- Foundation --- */
+@import "./styles/reset.css";        /* Reset CSS */
+@import "./styles/tokens.css";       /* :root design token / MD3 type scale */
+
+/* --- Shared UI --- */
+@import "./styles/buttons.css";      /* Buttons and Links (btn*) / MD3 State Layer */
+@import "./styles/text-field.css";   /* MD3 Outline Text Field */
+
+/* --- Page-Specific --- */
+@import "./styles/account.css";      /* Error Messages / Account Page */
+@import "./styles/guest.css";        /* Guest Banner (Offline / Import) */
+@import "./styles/header.css";       /* Header / Navigation */
+@import "./styles/footer.css";       /* Footer */
+@import "./styles/auth.css";         /* Login / Sign Up */
+@import "./styles/home.css";         /* Home / Trip List / Empty State */
+@import "./styles/trip-form.css";    /* Home > Trip Form / Date Modal */
+@import "./styles/modals.css";       /* Shared Modal Components (Home/Weekly/DaySchedule) */
+@import "./styles/weekly.css";       /* Weekly Page / Accommodation Timeline Bar */
+@import "./styles/day-schedule.css"; /* DaySchedule Page / ActivityCard */
+@import "./styles/map.css";          /* DaySchedule > Map */
+@import "./styles/confirm-modal.css";/* Confirmation Modal */
+@import "./styles/toast.css";        /* Toast Notifications */
+
+/* --- Accessibility --- */
+@import "./styles/a11y.css";         /* prefers-reduced-motion */

@@ -1,0 +1,129 @@
+/* ===========================
+    For guest users
+============================= */
+.guest-banner {
+  background-color: var(--color-bg-banner);
+  border-bottom: 1px solid var(--md-warning-border);
+  padding: var(--space-16) var(--space-18);
+}
+
+.guest-banner__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-18);
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.guest-banner__message {
+  display: flex;
+  align-items: center;
+  gap: var(--space-14);
+  font-size: var(--space-16);
+  color: var(--color-text);
+}
+
+.guest-banner__icon {
+  flex-shrink: 0;
+  color: var(--md-warning-text);
+}
+
+.guest-banner__actions {
+  display: flex;
+  gap: var(--space-14);
+  flex-shrink: 0;
+}
+
+.offline-banner{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  padding: var(--space-10) var(--space-16);
+  background-color: #3a3a3a;
+  color: var(--color-text-inverse);
+  font-size: var(--space-14);
+  text-align: center;
+}
+.offline-banner--recovered{
+  background-color: var(--color-success);
+}
+
+.guest-import-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-18);
+  background-color: var(--color-bg-banner);
+  border: 1px solid var(--md-warning-border);
+  border-radius: var(--space-16);
+  padding: var(--space-16) var(--space-18);
+  margin-bottom: var(--space-24);
+}
+
+.guest-import-banner__message {
+  display: flex;
+  align-items: center;
+  gap: var(--space-14);
+  font-size: var(--space-16);
+  color: var(--color-text);
+}
+
+.guest-import-banner__message svg {
+  flex-shrink: 0;
+  color: var(--md-warning-text);
+}
+
+.guest-import-banner__actions {
+  display: flex;
+  gap: var(--space-14);
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .guest-import-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-14);
+  }
+  .guest-import-banner__actions {
+    width: 100%;
+  }
+  .guest-import-banner__actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+.travel-message{
+  display: flex;
+  flex-direction: column;
+}
+.guest-notice {
+  font-size: var(--space-16);
+  color: var(--color-muted);
+  text-align: center;
+  margin-top: var(--space-10);
+}
+.form-hint {
+  font-size: var(--space-16);
+  color: var(--color-muted);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .guest-banner__inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-14);
+  }
+  .guest-banner__actions {
+    width: 100%;
+  }
+  .guest-banner__actions .btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+

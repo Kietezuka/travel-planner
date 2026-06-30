@@ -1,0 +1,460 @@
+/* ===========================
+    DaySchedule Page
+============================= */
+.page-loading{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: var(--space-18);
+  min-height: 60vh;
+}
+.page-loading__spinner {
+  width: 40px;
+  height: 40px;
+  color: var(--color-primary);
+  animation: spinner-rotate 0.9s linear infinite;
+}
+@keyframes spinner-rotate {
+  to { transform: rotate(360deg); }
+}
+.page-error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-16);
+  padding: var(--space-24);
+  min-height: 40vh;
+}
+.page-error__code {
+  font-size: 6.4rem;
+  font-weight: 700;
+  color: var(--color-primary-text);
+  line-height: 1;
+}
+.page-error__message {
+  font-size: var(--space-18);
+  color: var(--color-primary-text);
+  text-align: center;
+}
+.page-error__actions {
+  display: flex;
+  gap: var(--space-14);
+}
+.day-schedule{
+  background-color: var(--color-bg-3);
+  padding: var(--space-32);
+  border-radius: var(--space-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-32);
+}
+.day-schedule__destination{
+  grid-area: destination;
+  font-size: var(--space-32);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: 0.05em;
+}
+.day-schedule__header{
+  display: grid;
+  grid-template:
+    "destination day-jump" auto
+    "actions     actions " auto
+    / 1fr auto;
+  align-items: center;
+  gap: var(--space-16) var(--space-10);
+}
+.day-schedule__header > .day-jump{
+  grid-area: day-jump;
+}
+
+.day-schedule__header-actions{
+  grid-area: actions;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-10);
+}
+
+.day-schedule__contents{
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-16);
+}
+
+/* Day-list box */
+.empty-state{
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-16);
+  height: 100%;
+  padding: var(--space-32) var(--space-16);
+  font-size: var(--space-16);
+  color: var(--color-muted);
+  text-align: center;
+}
+.day-list{
+  width: 40%;
+  border-radius: var(--space-16);
+  border: 0.1rem solid var(--border-normal);
+  background-color: var(--color-bg-card);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.day-list__item{
+  width: 100%;
+}
+.day-list__header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-24);
+  border-bottom: 0.1rem solid var(--border-normal);
+  background-color: var(--color-bg-table-head);
+}
+.day-list__title{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+  font-size: var(--space-24);
+  font-weight: 700;
+  color: var(--md-on-primary);
+}
+.day-list__content{
+  max-height: 50vh;
+  padding: var(--space-16);
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* right-panel*/
+.right-panel{
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+  gap: var(--space-16);
+}
+
+.map-wrapper {
+  z-index: var(--z-map);
+  flex: 8;
+  min-height: 300px;
+}
+.map-skeleton {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  border-radius: var(--space-16);
+  background: linear-gradient(90deg, var(--color-bg-3) 25%, var(--color-bg-card) 50%, var(--color-bg-3) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* bottom-panel */
+.bottom-panel{
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  padding-top: var(--space-32);
+  border-top: 1px solid var(--border-sub);
+}
+.bottom-panel label{
+  font-size: var(--space-16);
+  font-weight: var(--font-weight-strong);
+  color: var(--color-text);
+}
+.memo-saving{
+  color: var(--color-muted);
+  font-size: 0.9em;
+  font-weight: 400;
+}
+
+/* teardrop map pin: colored body + centered white number / hotel glyph */
+.map-pin{
+  position: relative;
+  width: 3.6rem;
+  height: 4.8rem;
+  transform-origin: bottom center;
+  transition: transform 0.2s ease;
+}
+.map-pin.is-focused{
+  transform: scale(1.3);
+  z-index: 1000;
+}
+.map-pin__body{
+  display: block;
+  filter: drop-shadow(0 0.2rem 0.2rem rgba(0, 0, 0, 0.3));
+}
+/* the label sits over the circular head (top 3.6rem square of the 3.6×4.8 pin) */
+.map-pin__label{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3.6rem;
+  height: 3.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-inverse);
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1;
+  pointer-events: none;
+}
+.map-pin__label svg{
+  width: 1.8rem;
+  height: 1.8rem;
+  fill: var(--color-text-inverse);
+}
+
+/* jump-to-day selector in the day view header */
+.day-jump{
+  border: 0.1rem solid var(--border-normal);
+  border-radius: var(--space-8);
+  background-color: var(--color-bg-3);
+  padding: var(--space-10) var(--space-14);
+  font-size: var(--space-16);
+  cursor: pointer;
+  min-height: var(--touch-target-min);
+}
+
+/* note area*/
+.note{
+  background-color: var(--color-bg-card);
+  border-radius: var(--space-16);
+  border: 1px solid var(--border-note);
+  resize: none;
+  width: 100%;
+  padding: var(--space-16);
+  font-size: var(--space-16);
+}
+.note:focus{
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+/* Tablet (641px – 1024px) */
+@media (min-width: 641px) and (max-width: 1024px) {  
+  .day-schedule__contents{
+    flex-direction: column-reverse;
+    gap: var(--space-32);
+  }
+  .right-panel{
+    width: 100% !important;
+  }
+  .day-list{
+    width: 100%;
+    min-height: 30rem;
+  }
+  .day-list__content{
+    max-height: 65vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .activity__meta-text{
+    width: 65%;
+  }
+}
+
+/* MOBILE (≤ 640px)*/
+@media (max-width: 640px) {
+  .activity{
+    padding: var(--space-8);
+    gap: var(--space-10);
+  }
+
+  .day-schedule__contents{
+    flex-direction: column-reverse;
+    gap: var(--space-32);
+  }
+  .day-jump{
+    margin: auto 0 auto auto;
+  }
+  .right-panel{
+    width: 100% !important;
+  }
+  .day-list{
+    width: 100%;
+    min-height: 30rem;
+  }
+  .day-schedule{
+    margin: var(--space-10);
+    padding: var(--space-24);
+    background-color: transparent;
+    gap: var(--space-24);
+  }
+  .day-list__content{
+    max-height: 60vh;
+    min-height: 30vh;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-10);
+  }
+  .btn--sm{
+    min-height: var(--touch-target-min);
+    padding: 0.7rem;
+  }
+  .day-schedule__header{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-8);
+  }
+  .day-schedule__destination{
+    font-size: 2rem;
+  }
+  .map-wrapper{
+    min-height: 22rem;
+  }
+  .map-skeleton{
+    min-height: 22rem;
+  }
+  .activity__color{
+    display: none;
+  }
+}
+
+@media (max-width: 485px) {
+  .day-list__header{
+    padding: var(--space-16);
+  }
+  .day-list__title{
+    font-size: var(--space-16);
+    display: flex;
+    flex-direction: column;
+  }
+  .activity__media--category{
+    font-size: 1.5rem;
+  }
+}
+  
+
+/* =========================================
+  DaySchedule Page > ActivityCard Component
+============================================ */
+.activity{
+  padding: var(--space-12);
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-16);
+  margin-bottom: var(--space-16);
+  border-radius: var(--space-16);
+  border: 0.1rem solid var(--border-normal);
+  background-color: var(--color-bg-card);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.5s ease;
+}
+
+.activity-active{
+  box-shadow: var(--shadow-card);
+  transform: translateY(-2px);
+  z-index: 10;
+}
+@media (hover: hover) {
+  .activity:hover{
+    box-shadow: var(--shadow-card);
+    transform: translateY(-2px);
+    z-index: 10;
+  }
+}
+
+.activity__media--category{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.6rem;
+  border-radius: var(--space-8);
+  flex-shrink: 0;
+}
+
+.activity__media{
+  border-radius: var(--space-8);
+}
+.activity__body{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.activity__header{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-16);
+}
+.activity__header-2{
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+}
+.activity__title{
+  font-size: var(--space-16);
+  font-weight: var(--font-weight-strong);
+  color: var(--color-text);
+}
+.activity__time{
+  font-size: var(--space-14);
+  color: var(--color-muted);
+  white-space: nowrap;
+  font-weight: var(--font-weight-normal);
+}
+.activity__meta{
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-primary);
+}
+
+.activity__meta svg {
+  height: auto;
+  max-width: 2rem;
+  width: 100%;
+}
+.activity__meta-text{
+  font-size: var(--space-14);
+  color: var(--color-text-subtle);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+.activity__color{
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+}
+.activity__actions{
+  margin-top: var(--space-8);
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-8);     
+}
+
+/* MOBILE (≤ 640px)*/
+@media (max-width: 640px) {
+  .activity{
+    gap: var(--space-8);
+  }
+  .activity__actions{
+    justify-content: flex-end;
+    gap: var(--space-8);
+    flex-wrap: wrap;
+  }
+}

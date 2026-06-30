@@ -1,0 +1,106 @@
+/* ==================================================================
+    Toast Notifications  (Gulf of Evaluation — Active Feedback)
+===================================================================== */
+.toast-stack {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 0.875rem 0.875rem 0.875rem;
+  border-radius: var(--shape-md);
+  box-shadow: var(--md-elevation-3);
+  pointer-events: all;
+  min-width: 240px;
+  max-width: 360px;
+  animation: toast-slide-in 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.toast__action{
+  flex-shrink: 0;
+  padding: 0.4rem 1rem;
+  font-size: var(--space-12);
+  font-weight: 700;
+  color: var(--color-primary-text);
+  border: 0.1rem solid currentColor;
+  border-radius: var(--space-8);
+  background-color: transparent;
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .toast__action:hover{
+    background-color: rgba(64, 98, 163, 0.1);
+  }
+}
+
+@keyframes toast-slide-in {
+  from { transform: translateX(110%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+.toast--success { background: var(--color-success-bg); }
+.toast--error   { background: var(--md-error-container); }
+.toast--info    { background: var(--md-primary-container); }
+
+/* Colored icon badge (circle) */
+.toast__badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.toast--success .toast__badge { background: var(--color-success);  color: var(--color-text-inverse); }
+.toast--error   .toast__badge { background: var(--color-error);    color: var(--color-text-inverse); }
+.toast--info    .toast__badge { background: var(--color-primary);  color: var(--color-text-inverse); }
+
+.toast__message {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.toast__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+}
+@media (hover: hover) {
+  .toast__close:hover {
+    background: rgba(0,0,0,0.07);
+    color: var(--color-text);
+  }
+}
+
+
+@media (max-width: 640px) {
+  .toast-stack {
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+  }
+  .toast {
+    max-width: 100%;
+  }
+}
+

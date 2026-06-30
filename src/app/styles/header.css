@@ -1,0 +1,121 @@
+/* ===========================
+     Header
+============================= */
+.app-top{
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+}
+
+.header{
+  height: var(--header-height-pc);
+  background-color: var(--color-bg);
+  transition: var(--transition-all);
+  border-bottom: 0.1rem solid var(--border-sub);
+}
+.header__inner{
+  width: 100%;
+  padding: var(--space-24);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--header-height-pc);
+}
+
+.header__brand{
+  display: flex;
+  gap: var(--space-8);
+  align-items: center;
+}
+
+.header__logo{
+  width: var(--space-32);
+  height: var(--space-32);
+}
+
+.header__brand-name{
+  color: var(--color-text);
+  font-size: var(--space-32);
+  font-weight: 700;
+}
+
+.header__nav{
+  display: flex;
+  gap: var(--space-32);
+  align-items: center;
+}
+
+
+
+.header__nav-link{
+  transition: var(--transition-all);
+  color: var(--color-text-subtle);
+  font-size: var(--space-24);
+  font-weight: 600;
+}
+
+.active-link{
+  color: var(--color-primary);
+}
+
+.header__nav .active-link {
+  border-bottom: 0.2rem solid currentColor;
+}
+
+@media (hover: hover) {
+  .header__nav-link:hover{
+    color: var(--color-text);
+  }
+}
+
+.header__actions{
+  display: flex;
+  gap: var(--space-12);
+  align-items: center;
+}
+
+
+.header__btn-label {
+  font-size: var(--space-16);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+
+  .header{
+    height: auto;
+  }
+  .header__inner{
+    flex-wrap: wrap;
+    height: auto;
+    padding: var(--space-10);
+    row-gap: var(--space-10);
+  }
+  .header__actions{
+    gap: var(--space-10);
+  }
+  .header__btn-label {
+    display: none;
+  }
+  .header__nav{
+    order: 3;
+    width: 100%;
+    justify-content: space-around;
+    gap: var(--space-16);
+    margin: 0;
+    font-size: var(--space-16);
+  }
+  .header__nav-link{
+    font-size: var(--space-16);
+    white-space: nowrap;
+    min-height: var(--touch-target-min);
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-10);
+  }
+  .header__brand-name{
+    font-size: var(--space-16);
+  }
+}
+

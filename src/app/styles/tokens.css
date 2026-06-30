@@ -1,0 +1,223 @@
+/* 62.5% keeps 1rem = 10px at the default size while still
+   scaling with the user's browser font-size setting (WCAG 1.4.4) */
+html {
+  font-size: 62.5%;
+}
+
+:root {
+  /* ══════════════════════════════════════════════════════════
+     MATERIAL DESIGN 3 — Core Color Palette
+     Roles: Primary (Blue) · Error (Red) · Surface (Neutral)
+     ══════════════════════════════════════════════════════════ */
+
+  /* ── Primary (Ink Blue) ───────────────────────────────── */
+  --md-primary:              #3A68A5;
+  --md-primary-hover:        #2B5290;
+  --md-on-primary:           #FFFFFF;
+  --md-primary-container:    #E4EDF7;
+
+  /* ── Error (Ink Red) ───────────────────────────────────── */
+  --md-error:                #C0392B;
+  --md-error-container:      #FAE9E7;
+
+  /* ── Surface (Warm Parchment) ──────────────────────────── */
+  --md-surface:              #FAF7F2;  
+  --md-surface-variant:      #F0ECE4;   
+  --md-surface-container:    #FFFFFF;   
+  --md-on-surface:           #1E1B16;
+  --md-on-surface-variant:   #5C5649;   
+
+  /* ── Outline (Warm Gray) ─────────────────────────────────*/
+  --md-outline:              #C6C0B6;
+  --md-outline-variant:      #DED9D1;
+
+  /* ── Secondary (Sage Teal) ───────────────────────────────*/
+  --md-secondary-container:   #D6E6E5;
+  --md-on-secondary-container:#16302F;
+
+  /* ── Utility ─────────────────────────────────────────────*/
+  --md-success:              #2E7D52;
+  --md-success-bg:           #EAF4EE;
+  --md-warning-text:         #8B5E00;
+  --md-warning-bg:           #FEF6E4;
+  --md-warning-border:       #E5C84A;
+
+  /* ══════════════════════════════════════════════════════════
+     SEMANTIC ALIASES  (MD3 Role → Component Token)
+     ══════════════════════════════════════════════════════════ */
+
+  /* ── Brand / Interactive ────────────────────────────────*/
+  --color-primary:         var(--md-primary);
+  --color-primary-text:    var(--md-primary-hover);
+  --color-secondary-container: var(--md-secondary-container);
+  --color-on-secondary-container: var(--md-on-secondary-container);
+
+  /* ── Text ────────────────────────────────────────────────*/
+  --color-text:            var(--md-on-surface);
+  --color-text-subtle:     var(--md-on-surface-variant);
+  --color-muted:           var(--md-on-surface-variant);
+
+  /* ── Feedback ───────────────────────────────────────────*/
+  --color-error:           var(--md-error);
+  --color-success:         var(--md-success);
+  --color-success-bg:      var(--md-success-bg);
+
+  /* ── Background / Surface ────────────────────────────────*/
+  --color-bg:              var(--md-surface);
+  --color-bg-2:            var(--md-surface-container);
+  --color-bg-3:            var(--md-surface-variant);
+  --color-bg-card:         var(--md-surface-container);
+  --color-bg-banner:       var(--md-warning-bg);
+  --color-bg-footer:       #1A1612; 
+  --color-text-inverse:    #FFFFFF; 
+  --color-bg-table-head:   var(--md-primary);
+  --color-bg-home-form:    var(--md-primary-container);
+
+  /* ── Border ──────────────────────────────────────────────*/
+  --border-normal:         var(--md-outline);
+  --border-sub:            var(--md-outline-variant);
+  --border-note:           var(--md-outline);
+  --color-border-table:    var(--md-outline);
+
+  /* ── Spacing (px html 62.5% -> 1rem = 10px) ─────*/
+  --space-8:               0.8rem;
+  --space-10:              1rem;
+  --space-12:              1.2rem;
+  --space-14:              1.4rem;
+  --space-16:              1.6rem;
+  --space-18:              1.8rem;
+  --space-24:              2.4rem;
+  --space-28:              2.8rem;   /* emoji */
+  --space-32:              3.2rem;
+  --touch-target-min:      4.8rem;   /* MD3 Recommended Minimum Touch Target 48dp */
+
+  /* ── Layout ──────────────────────────────────────────────*/
+  --container-max:         128rem;
+  --header-height-pc:      10rem;
+
+  /* ── Typography ──────────────────────────────────────────*/
+  --font-main:             "Roboto", sans-serif;
+  --font-weight-strong:    600;
+  --font-weight-normal:    500;
+
+  /* ── MD3 Type scale (sp ≒ px, html 62.5% -> 1rem = 10px) ──
+     role: size / line-height / letter-spacing / weight             */
+  --type-headline-s-size:2.4rem;  --type-headline-s-lh:3.2rem;  --type-headline-s-ls: 0;
+  --type-title-l-size:   2.2rem;  --type-title-l-lh:   2.8rem;  --type-title-l-ls: 0;
+  --type-body-l-size:    1.6rem;  --type-body-l-lh:    2.4rem;  --type-body-l-ls: 0.03em;
+  --type-body-m-size:    1.4rem;  --type-body-m-lh:    2.0rem;  --type-body-m-ls: 0.025em;
+
+  /* ── MD3 Shape scale ─────────────────────────────────────*/
+  --shape-xs:              0.4rem;   /* 4dp — Inside chips, etc. */
+  --shape-md:              1.2rem;   /* 12dp — Cards / Text fields */
+  --shape-xl:              2.8rem;   /* 28dp — Modals / Large containers */
+  --shape-full:            999rem;   /* pill — Buttons / Chips */
+
+  /* ── MD3 Elevation  ── ─────────────────────────────────────*/
+  --md-elevation-1:        0 1px 2px rgba(30,27,22,0.16), 0 1px 3px 1px rgba(30,27,22,0.10);
+  --md-elevation-2:        0 1px 2px rgba(30,27,22,0.18), 0 2px 6px 2px rgba(30,27,22,0.10);
+  --md-elevation-3:        0 1px 3px rgba(30,27,22,0.18), 0 4px 8px 3px rgba(30,27,22,0.10);
+
+  /* ── State layer opacities (MD3) ─────────────────────────*/
+  --state-hover:           0.08;
+  --state-focus:           0.10;
+  --state-pressed:         0.10;
+
+  /* ── Shadow  ─────────────────────────────────────────────────────*/
+
+
+  --shadow-card:           var(--md-elevation-2);
+  --shadow-sm:             var(--md-elevation-1);
+
+  /* ── Motion (MD3 duration + easing) ──────────────────────*/
+  --md-easing-standard:    cubic-bezier(0.2, 0, 0, 1);
+  --md-duration-short:     150ms;
+  --md-duration-medium:    250ms;
+  --transition-all:        all var(--md-duration-medium) var(--md-easing-standard);
+
+  /* ── Z-index ──────────────────────────────────*/
+  --z-map:                 1;
+  --z-chip--absolute:      9;
+  --z-time-cell:           10;
+  --z-weekly-thead:        150;
+  --z-weekly-sticky-th:    160;
+  --z-header:              170;
+  --z-dropdown:            200;
+  --z-overlay:             1000;
+  --z-fab:                 1000;
+  --z-modal:               1010;
+}
+
+
+body {
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-family: var(--font-main);
+}
+
+/* keyboard users can jump straight past the header */
+.skip-link{
+  position: absolute;
+  top: -100%;
+  left: var(--px-base);
+  z-index: 9999;
+  padding: var(--px-xxs) var(--px-base);
+  background-color: var(--color-primary-text);
+  color: #fff;
+  font-size: var(--px-base);
+  font-weight: 700;
+  border-radius: 0 0 var(--px-xxxxs) var(--px-xxxxs);
+}
+.skip-link:focus{
+  top: 0;
+}
+
+main {
+  min-height: calc(100vh - var(--header-height-pc));
+  padding: var(--px-xxlg);
+}
+
+/* Assign the MD3 type scale to the headline and body text
+   (Apply line-height and letter-spacing while maintaining the size at roughly the same level as before)*/
+h1{
+  font-weight: 700;
+  font-size: var(--type-headline-s-size);
+  line-height: var(--type-headline-s-lh);
+  letter-spacing: var(--type-headline-s-ls);
+}
+
+h2{
+  font-size: var(--type-headline-s-size);
+  line-height: var(--type-headline-s-lh);
+  letter-spacing: var(--type-headline-s-ls);
+  font-weight: 600;
+}
+
+h3, h4{
+  font-size: 2rem;
+  line-height: var(--type-title-l-lh);
+  letter-spacing: var(--type-title-l-ls);
+  font-weight: var(--font-weight-strong);
+}
+
+p{
+  font-weight: 500;
+  font-size: var(--type-body-l-size);
+  line-height: var(--type-body-l-lh);
+  letter-spacing: var(--type-body-l-ls);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+/* MOBILE (≤ 640px)*/
+@media (max-width: 640px) {
+  main{
+    padding: 0;
+  }
+  
+  h2{
+    font-size: var(--px-xlg);
+  }
+}

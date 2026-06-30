@@ -1,0 +1,173 @@
+/* ===========================
+     BUTTON , LINK 
+============================= */
+
+/* link hover */
+@media (hover: hover) {
+  input:hover,
+  select:hover,
+  button:hover,
+  a:hover {
+    opacity: 0.7;
+  }
+}
+
+input, select, a{
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/*:focus-visible*/
+/* The reset strips outline from all form controls; restore a single
+   consistent keyboard-focus indicator across every interactive element.
+   The white halo keeps the navy ring visible on dark backgrounds
+   (e.g. the blue weekly table header). */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible{
+  outline: 0.2rem solid var(--color-primary-text);
+  outline-offset: 0.2rem;
+  box-shadow: 0 0 0 0.4rem rgba(255, 255, 255, 0.9);
+}
+
+/*Button*/
+.btn{
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  padding: var(--space-12) var(--space-24);
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  font-size: var(--space-16);
+  font-weight: var(--font-weight-normal);
+  border-radius: var(--shape-full);   /* MD3: ボタンは pill 形状 */
+  transition: box-shadow var(--md-duration-short) var(--md-easing-standard),
+              background-color var(--md-duration-short) var(--md-easing-standard);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* ── MD3 State layer ──────────────────────────────────────
+  A semi-transparent overlay with values of 8% on hover, 10% on focus, and 10% when pressed.
+  The "on-color" is approximated using `currentColor`, and by setting `z-index: -1`, it is placed above the background and
+  below the label so that it does not cover the text.                  */
+
+.btn::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-color: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--md-duration-short) var(--md-easing-standard);
+}
+@media (hover: hover){
+  .btn:hover::after{ opacity: var(--state-hover); }
+}
+.btn:focus-visible::after{ opacity: var(--state-focus); }
+.btn:active::after{ opacity: var(--state-pressed); }
+.btn:disabled::after,
+.btn--disable::after{ opacity: 0; }
+
+.btn--sm{
+  min-height: 3.6rem;
+  padding: 0.8rem;
+  font-size: var(--space-16);
+  font-weight: bold;
+}
+
+.btn--primary{
+  background-color: var(--color-primary);
+  color: var(--md-on-primary);
+  font-weight: 700;
+  font-size: var(--space-16);
+}
+
+.btn--primary:disabled {
+  background-color: #ccc;
+  border-color: #bbb;
+  color: #888;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+@media (hover: hover) {
+  .btn--primary:disabled:hover {
+    background-color: #ccc;
+    transform: none;
+  }
+}
+  
+.btn--secondary{
+  background-color: var(--color-bg-2);
+  padding: var(--space-12);
+  color: var(--color-text-subtle);
+  border: 0.1rem solid var(--border-normal);
+}
+
+.btn--tonal{
+  background-color: var(--color-secondary-container);
+  color: var(--color-on-secondary-container);
+  font-weight: 700;
+}
+
+.btn--destruction{
+  background-color: #E46962;
+  color: var(--color-text-inverse);
+}
+
+.btn--disable{
+  background-color: #ccc;
+  border-color: #bbb;
+  color: #888;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+@media (hover: hover) {
+  .btn--disable:hover{
+    transform: none;
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  gap: 5rem;
+  max-width: var(--container-max);
+  margin-left: auto; 
+  margin-right: auto;
+  padding: var(--space-32) var(--space-16);
+}
+
+/* MOBILE (≤ 640px)*/
+@media (max-width: 640px) {
+  .btn{
+    gap: var(--space-8);
+    padding: var(--space-10);
+  } 
+
+  .container {
+    gap: var(--space-24);
+    padding-left: var(--space-24);
+    padding-right: var(--space-24);
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding-left: var(--space-32); 
+    padding-right: var(--space-32);
+  }
+}
+
