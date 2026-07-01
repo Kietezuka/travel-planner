@@ -2,7 +2,7 @@
 
 import db from "../lib/db";
 import bcrypt from "bcryptjs";
-import { validateEmail, validatePassword } from "./validation";
+import { getEmailError, getPasswordError } from "./validation";
 
 export async function signupAction(formData) {
   // Normalize email (lowercase + trim) so it's stored and matched consistently.
@@ -12,14 +12,17 @@ export async function signupAction(formData) {
   const confirmPassword = formData.get("confirmPassword");
 
   if (!email || !password || !userName) {
-    throw new Error("All fields are required");
+    return { success: false, error: "All fields are required" };
   }
 
-  validateEmail(email);
-  validatePassword(password);
+  const emailError = getEmailError(email);
+  if (emailError) return { success: false, error: emailError };
+
+  const passwordError = getPasswordError(password);
+  if (passwordError) return { success: false, error: passwordError };
 
   if (password !== confirmPassword) {
-    throw new Error("Passwords do not match. Please re-enter your password.");
+    return { success: false, error: "Passwords do not match. Please re-enter your password." };
   }
 
   // Hash the password
@@ -38,10 +41,10 @@ export async function signupAction(formData) {
       error.code === "SQLITE_CONSTRAINT_UNIQUE" ||
       error.code?.includes("CONSTRAINT")
     ) {
-      throw new Error("Email already exists");
+      return { success: false, error: "Email already exists" };
     }
     console.error("Signup Error:", error);
-    throw new Error("Something went wrong during signup");
+    return { success: false, error: "Something went wrong during signup" };
   }
 
   // The client signs the user in right away - no second login step

@@ -57,7 +57,12 @@ export default function Signup(){
         setError("");
         setIsPending(true); // Start loading
         try {
-            await signupAction(formData);
+            const signupResult = await signupAction(formData);
+            if (!signupResult?.success) {
+                setError(signupResult?.error || "Something went wrong during signup");
+                setIsPending(false);
+                return;
+            }
 
             const result = await signIn("credentials", {
                 email: formData.get("email"),

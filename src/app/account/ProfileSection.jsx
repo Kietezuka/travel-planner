@@ -27,7 +27,11 @@ export default function ProfileSection({ session, update }) {
         setPending(true);
         try {
             const formData = new FormData(e.currentTarget);
-            await updateProfileAction(formData);
+            const result = await updateProfileAction(formData);
+            if (!result?.success) {
+                setError(result?.error || "Something went wrong");
+                return;
+            }
             await update();
             setIsEditing(false);
             setSuccess("Profile updated.");

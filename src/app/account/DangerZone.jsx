@@ -19,7 +19,12 @@ export default function DangerZone() {
         try {
             const formData = new FormData();
             formData.append("password", password);
-            await deleteAccountAction(formData);
+            const result = await deleteAccountAction(formData);
+            if (!result?.success) {
+                setError(result?.error || "Something went wrong");
+                setPending(false);
+                return;
+            }
             // account is deleted -> end the session and land on the public home
             await signOut({ callbackUrl: "/" });
         } catch (err) {

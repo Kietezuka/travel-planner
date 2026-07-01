@@ -21,7 +21,11 @@ export default function PasswordSection() {
         setPending(true);
         try {
             const formData = new FormData(e.currentTarget);
-            await updatePasswordAction(formData);
+            const result = await updatePasswordAction(formData);
+            if (!result?.success) {
+                setError(result?.error || "Something went wrong");
+                return;
+            }
             setSuccess("Password updated.");
             setShowForm(false);
             e.target.reset();
