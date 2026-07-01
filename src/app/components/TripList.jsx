@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
@@ -56,8 +56,7 @@ function TripItem({ trip, isPast, onDeleteClick }) {
 export default function TripList({ userTrips }){
     const router = useRouter();
     const showToast = useToast();
-    const [ displayItems, setDisplayItems ] = useState(5);
-    const showMore = displayItems > 5;
+    const [expanded, setExpanded] = useState(false);
     const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
     const today = format(new Date(), "yyyy-MM-dd");
@@ -69,9 +68,13 @@ export default function TripList({ userTrips }){
         .filter(trip => trip.endDate < today)
         .sort((a, b) => b.startDate.localeCompare(a.startDate));
 
-    const handleSeeMore = () => setDisplayItems(pastTrips.length);
-
-    const handleSeeLess = () => setDisplayItems(5);
+    // One combined list (upcoming first, then past), collapsed to 5 until expanded.
+    const LIST_LIMIT = 5;
+    const orderedTrips = [
+        ...upcomingTrips.map(trip => ({ trip, isPast: false })),
+        ...pastTrips.map(trip => ({ trip, isPast: true })),
+    ];
+    const visibleTrips = expanded ? orderedTrips : orderedTrips.slice(0, LIST_LIMIT);
 
     const handleDeleteClick = (tripId) => {
         setPendingDeleteId(tripId);
@@ -116,24 +119,24 @@ export default function TripList({ userTrips }){
                     </div>
                 )}
 
-                {upcomingTrips.map((trip) => (
-                    <TripItem key={trip.id} trip={trip} isPast={false} onDeleteClick={handleDeleteClick} />
-                ))}
+                {visibleTrips.map((item, idx) => {
+                    const prev = visibleTrips[idx - 1];
+                    // Show the "Past trips" heading right before the first past trip
+                    const showPastHeading = item.isPast && (!prev || !prev.isPast);
+                    return (
+                        <Fragment key={item.trip.id}>
+                            {showPastHeading && <h3 className="history-section-title">Past trips</h3>}
+                            <TripItem trip={item.trip} isPast={item.isPast} onDeleteClick={handleDeleteClick} />
+                        </Fragment>
+                    );
+                })}
 
-                {pastTrips.length > 0 && (
-                    <>
-                        <h3 className="history-section-title">Past trips</h3>
-                        {pastTrips.slice(0, displayItems).map((trip) => (
-                            <TripItem key={trip.id} trip={trip} isPast={true} onDeleteClick={handleDeleteClick} />
-                        ))}
-                        {pastTrips.length > 5 && (
-                            <button
-                                className="btn btn--primary"
-                                onClick={showMore ? handleSeeLess : handleSeeMore}>
-                                {showMore ? "See Less" : "See More"}
-                            </button>
-                        )}
-                    </>
+                {orderedTrips.length > LIST_LIMIT && (
+                    <button
+                        className="btn btn--primary"
+                        onClick={() => setExpanded(v => !v)}>
+                        {expanded ? "See Less" : "See More"}
+                    </button>
                 )}
             </div>
             {pendingDeleteId && (
