@@ -39,6 +39,10 @@ main.db
 .env*
 !.env.example
 
+# demo media — keep the lightweight README GIF, but not the MP4 recordings
+# (the full walkthrough is hosted on GitHub as an uploaded attachment instead)
+/public/demo_videos/*.mp4
+
 # vercel
 .vercel
 
