@@ -2,7 +2,7 @@
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
-import { createActivityAction, saveDayMemoAction, updateActivityAction, deleteActivityAction, updateAccommodationAction, createAccommodationAction } from "../actions/trip";
+import { createActivityAction, saveDayMemoAction, updateActivityAction, deleteActivityAction } from "../actions/trip";
 
 import ActivityCard from "../components/ActivityCard";
 import AddActivityModal from "../components/AddActivityModal";
@@ -137,35 +137,6 @@ export default function DaySchedule({
         }
     };
 
-    const handleAddAccommodation = async (newAcc) => {
-        const tempId = crypto.randomUUID();
-        const accWithId = { ...newAcc, id: tempId };
-        const updated = [...accommodations, accWithId];
-
-        setAccommodations(updated);
-
-        if(isGuest) {
-            syncGuestStorage(activities, dayMemo, updated);
-            showToast("Accommodation added!", "success");
-        } else {
-            try {
-                const result = await createAccommodationAction(trip.id, newAcc);
-                if (result?.success && result.id) {
-                    setAccommodations(prev =>
-                        prev.map(a => a.id === tempId ? { ...a, id: String(result.id) } : a)
-                    );
-                    showToast("Accommodation added!", "success");
-                } else {
-                    setAccommodations(prev => prev.filter(a => a.id !== tempId));
-                    showToast(result?.error || "Could not save accommodation.", "error");
-                }
-            } catch(error) {
-                setAccommodations(prev => prev.filter(a => a.id !== tempId));
-                showToast("Could not save accommodation.", "error");
-            }
-        }
-    };
-
     const handleAddActivity = async (newActivity) => {
         const tempId = crypto.randomUUID();
         const activityWithId = { ...newActivity, id: tempId };
@@ -202,7 +173,7 @@ export default function DaySchedule({
         setDayMemo(e.target.value);
     };
 
-    // save memo into database
+    // persist the day's memo (DB for users, localStorage for guests)
     const handleSaveMemo = async () => {
         if (dayMemo === savedMemo) return; // nothing changed, no save/toast
 
@@ -447,10 +418,8 @@ export default function DaySchedule({
                         onClose={() => setSelectedActivity(null)}
                         onUpdateActivity={handleUpdateActivity}
                         onDelete={() => handleDeleteActivity(selectedActivity.id)}
-                        onShowDetails={setSelectedActivity}
                         tripStart={trip.startDate}
                         tripEnd={trip.endDate}
-                        category={selectedActivity.category}
                         existingActivities={activities}
                     />
                 )}

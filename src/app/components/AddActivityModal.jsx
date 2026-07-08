@@ -47,7 +47,6 @@ export default function AddActivityModal({
             lon: parseFloat(location.lon)
         })
     }
-    // 1. Unified Time Change Logic
     const handleTimeUpdate = (field, value) => {
         const updatedData = { ...formData, [field]: value };
         setFormData(updatedData);
@@ -71,7 +70,6 @@ export default function AddActivityModal({
         }
     };
 
-    // 2. Form Submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (timeError || isSubmitting ) return;
