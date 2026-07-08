@@ -46,7 +46,7 @@ function Draggable({activity, onClick, calculateSpan}){
     const style = {
         backgroundColor: categoryStyle.bg,
         border: `1px solid ${categoryStyle.color}`,
-        height: `${span * 40 - 2}px`,
+        height: `calc(${span * 4}rem - 0.2rem)`,
         opacity: isDragging ? 0.3 : 1,
         position: 'absolute',
         width: '100%',
@@ -82,7 +82,7 @@ function DragOverlayCard({ activity, calculateSpan }) {
             style={{
                 backgroundColor: categoryStyle.bg,
                 border: `1px solid ${categoryStyle.color}`,
-                height: `${span * 40 - 2}px`,
+                height: `calc(${span * 4}rem - 0.2rem)`,
                 width: '100%',
                 opacity: 0.9,
                 cursor: 'grabbing',
@@ -684,7 +684,6 @@ export default function WeeklyTable({tripId, destination, startDate, endDate, da
                         onUpdateActivity={handleSaveActivity}
                         tripStart={startDate}
                         tripEnd={endDate}
-                        category={selectedActivity.category}
                         existingActivities={allActivities}
                     />
                 )}
