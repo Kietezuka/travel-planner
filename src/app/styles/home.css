@@ -151,6 +151,17 @@
   white-space: nowrap;
 }
 
+.history-item-unsaved{
+  font-size: var(--space-12);
+  font-weight: normal;
+  color: var(--md-warning-text);
+  border: 0.1rem solid var(--md-warning-border);
+  border-radius: var(--space-8);
+  padding: 0.2rem 0.8rem;
+  align-self: center;
+  white-space: nowrap;
+}
+
 .history-item-days {
   font-size: var(--space-12);
   font-weight: normal;

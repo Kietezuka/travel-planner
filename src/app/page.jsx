@@ -5,6 +5,7 @@ import InputForm from "./components/InputForm";
 import TripList from "./components/TripList";
 import DeleteAllTripsButton from "./components/DeleteAllTripsButton";
 import GuestTripImportBanner from "./components/GuestTripImportBanner";
+import GuestTripCard from "./components/GuestTripCard";
 
 export default async function Home() {
     const session = await getServerSession(authOptions);
@@ -28,6 +29,8 @@ export default async function Home() {
                 </div>
                 <InputForm/>
             </section>
+
+            {!session && <GuestTripCard />}
 
             {session && (
                 <section className="home-history">
