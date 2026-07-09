@@ -271,7 +271,7 @@ export default function AccommodationDetailModal({
                                 <path d="M480-480q33 0 56.5-23.5T560-560q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 33 23.5 56.5T480-480Zm0 294q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"/>
                             </svg>
                             <input type="text"
-                                id="activity-address"
+                                id="accommodation-address"
                                 className="activity-modal__input is-readonly"
                                 placeholder="address"
                                 value={formData.address}
@@ -283,7 +283,7 @@ export default function AccommodationDetailModal({
                     (
                         <SearchLocationBar
                             key={accommodation.id}
-                            inputId="activity-address"
+                            inputId="accommodation-address"
                             label="Hotel name or address"
                             onSelect={handleLocationSelect}
                             onQueryChange={() => setFormData(prev => ({ ...prev, address: "", lat: null, lon: null }))}
@@ -298,7 +298,7 @@ export default function AccommodationDetailModal({
                     {isEditing ? (
                         <TextField
                             as="textarea"
-                            id="activity-memo"
+                            id="accommodation-memo"
                             label="Memo"
                             rows="3"
                             value={formData.memo}
@@ -306,8 +306,8 @@ export default function AccommodationDetailModal({
                         />
                     ) : (
                         <>
-                            <label htmlFor="activity-memo" className="travel-modal__label">Memo</label>
-                            <textarea id="activity-memo"
+                            <label htmlFor="accommodation-memo" className="travel-modal__label">Memo</label>
+                            <textarea id="accommodation-memo"
                                       className="travel-modal__textarea"
                                       placeholder="No memo"
                                       rows="3"
@@ -326,7 +326,6 @@ export default function AccommodationDetailModal({
                                     <path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/>
                                 </svg>
                             </button>
-                            {/* DELETE BUTTON */}
                             <button
                                 type="button"
                                 className="btn btn--sm btn--destruction"
