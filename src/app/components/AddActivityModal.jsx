@@ -72,11 +72,8 @@ export default function AddActivityModal({
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (timeError || isSubmitting ) return;
+        if (isSubmitting) return;
 
-        setIsSubmitting(true);
-
-        // Construct the final object
         const finalData = {
             title: formData.title,
             date: formData.date,
@@ -89,10 +86,39 @@ export default function AddActivityModal({
             lon: formData.lon ? Number(formData.lon) : null,
         };
 
-        try{
+        if (
+            toMinutes(finalData.endTime) <=
+            toMinutes(finalData.startTime)
+        ) {
+            setTimeError("End time must be after the start time!");
+            return;
+        }
+
+        const overlappingActivity = checkActivityOverlap(
+            existingActivities,
+            finalData.startTime,
+            finalData.endTime,
+            finalData.date
+        );
+
+        if (overlappingActivity) {
+            setTimeError(
+                `You already have an activity: "${overlappingActivity.title}" from ${overlappingActivity.startTime} to ${overlappingActivity.endTime}`
+            );
+            return;
+        }
+
+        setTimeError("");
+        setIsSubmitting(true);
+
+        try {
             await onAddActivity(finalData);
             onClose();
-        } catch (error){
+        } catch (error) {
+            setTimeError(
+                error?.message || "Could not save activity. Please try again."
+            );
+        } finally {
             setIsSubmitting(false);
         }
     };

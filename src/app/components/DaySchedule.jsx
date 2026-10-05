@@ -11,6 +11,7 @@ import ConfirmModal from "./ConfirmModal";
 import { useToast } from "./ToastProvider";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
+import { checkActivityOverlap, toMinutes } from "../utils/overlap";
 
 const Map = dynamic(() => import("./MapPanel"), {
     ssr: false,
@@ -138,6 +139,26 @@ export default function DaySchedule({
     };
 
     const handleAddActivity = async (newActivity) => {
+        if (
+            toMinutes(newActivity.endTime) <=
+            toMinutes(newActivity.startTime)
+        ) {
+            throw new Error("End time must be after the start time!");
+        }
+
+        const overlappingActivity = checkActivityOverlap(
+            activities,
+            newActivity.startTime,
+            newActivity.endTime,
+            newActivity.date
+        );
+
+        if (overlappingActivity) {
+            throw new Error(
+                `You already have an activity: "${overlappingActivity.title}" from ${overlappingActivity.startTime} to ${overlappingActivity.endTime}`
+            );
+        }
+
         const tempId = crypto.randomUUID();
         const activityWithId = { ...newActivity, id: tempId };
 
