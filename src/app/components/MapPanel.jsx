@@ -107,7 +107,10 @@ export default function MapPanel({ markers = [], activeId, focusedId, destinatio
                 zoom={13}
                 style={{height: "100%", width: "100%", minHeight: "400px"}}
             >
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <TileLayer
+                url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
 
                 <InitialView center={center} destinationCenter={destinationCenter} hasMarkers={markers && markers.length > 0} />
                 <MapViewUpdater markers={markers} focusedId={focusedId}/>

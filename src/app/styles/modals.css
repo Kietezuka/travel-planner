@@ -8,8 +8,9 @@
 .search-location__wrapper{
   width: 100%;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   position: relative;
+  gap: var(--space-16);
 }
 .result-text-wrapper > strong{
   margin-right: var(--space-10);

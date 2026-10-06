@@ -21,7 +21,6 @@ export default function SearchLocationBar({ onSelect, onQueryChange, defaultValu
     const [activeIndex, setActiveIndex] = useState(-1);
     const [noResults, setNoResults] = useState(false);
 
-    const debounceTimer = useRef(null);
     const abortRef = useRef(null);
     const wrapperRef = useRef(null);
     const listId = useId();
@@ -46,40 +45,54 @@ export default function SearchLocationBar({ onSelect, onQueryChange, defaultValu
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const handleSearch = async(value) =>{
-        setQuery(value);
+    useEffect(() => {
+        return () => abortRef.current?.abort();
+    }, []);
 
-        // The text no longer matches a picked option; let the parent
-        // invalidate its stored selection so display and data stay in sync
+    const handleQueryChange = (value) => {
+        abortRef.current?.abort();
+        abortRef.current = null;
+
+        setQuery(value);
         onQueryChange?.(value);
 
-        if(debounceTimer.current) clearTimeout(debounceTimer.current);
+        setResults([]);
+        setActiveIndex(-1);
+        setNoResults(false);
+        setLoading(false);
+    };
 
-        // 2 chars minimum so 2-character place names
-        if(value.trim().length < 2){
-            setResults([]);
-            setNoResults(false);
-            return;
-        }
+    const handleSearch = async() =>{
+        const value = query.trim();
 
-        debounceTimer.current = setTimeout(async() => {
-            setLoading(true);
+        if (value.length < 2 || loading) return;
 
-            // Cancel the previous in-flight request so a slow old response
-            // can't overwrite results for newer input
-            abortRef.current?.abort();
-            const controller = new AbortController();
-            abortRef.current = controller;
+        const controller = new AbortController();
+        abortRef.current = controller;
 
-            try {
+        setResults([]);
+        setActiveIndex(-1);
+        setNoResults(false);
+        setLoading(true);
+
+        try {
                 const queryString = (type !== "destination" && destination)
                     ? `${value}, ${destination}`
                     : value;
                 const url = `/api/geocode?q=${encodeURIComponent(queryString)}&type=${encodeURIComponent(type)}`;
                 const result = await fetch(url, { signal: controller.signal });
 
+                if (!result.ok) {
+                    throw new Error("Geocoding failed");
+                }
+
                 const data = await result.json();
-                if (!Array.isArray(data)) throw new Error("Geocoding failed");
+
+                if (controller.signal.aborted) return;
+
+                if (!Array.isArray(data)) {
+                    throw new Error("Geocoding failed");
+                }
 
                 if(type === "destination"){
                     const destinationTypes = new Set([
@@ -128,14 +141,20 @@ export default function SearchLocationBar({ onSelect, onQueryChange, defaultValu
                     setResults(sliced);
                     setNoResults(sliced.length === 0);
                 }
-            } catch(error){
-                if (error.name === "AbortError") return; // superseded by newer input
-                showToast("Location search failed. Please try again.", "error");
+            } catch (error) {
+                if (error.name === "AbortError") return;
+
+                showToast(
+                    "Location search failed. Please try again.",
+                    "error"
+                );
             } finally {
-                if (abortRef.current === controller) setLoading(false);
+                if (abortRef.current === controller) {
+                    abortRef.current = null;
+                    setLoading(false);
+                }
             }
-        }, 500);
-    };
+        };
 
     const selectOption = (option) => {
         onSelect(option);
@@ -146,22 +165,43 @@ export default function SearchLocationBar({ onSelect, onQueryChange, defaultValu
     };
 
     const handleKeyDown = (e) => {
+        if (
+            e.nativeEvent.isComposing ||
+            e.nativeEvent.keyCode === 229
+        ) {
+            return;
+        }
+
+        if (e.key === "Enter") {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (activeIndex >= 0 && results[activeIndex]) {
+                selectOption(results[activeIndex]);
+            } else {
+                void handleSearch();
+            }
+            return;
+        }
+
+        if (e.key === "Escape" && results.length > 0) {
+            e.preventDefault();
+            e.stopPropagation();
+            setResults([]);
+            setActiveIndex(-1);
+            return;
+        }
+
         if (!results.length) return;
 
         if (e.key === "ArrowDown") {
             e.preventDefault();
-            setActiveIndex(prev => Math.min(prev + 1, results.length - 1));
+            setActiveIndex((prev) =>
+                Math.min(prev + 1, results.length - 1)
+            );
         } else if (e.key === "ArrowUp") {
             e.preventDefault();
-            setActiveIndex(prev => Math.max(prev - 1, -1));
-        } else if (e.key === "Enter" && activeIndex >= 0) {
-            e.preventDefault();
-            selectOption(results[activeIndex]);
-        } else if (e.key === "Escape") {
-            // Close only the suggestion list; keep the surrounding modal open
-            e.stopPropagation();
-            setResults([]);
-            setActiveIndex(-1);
+            setActiveIndex((prev) => Math.max(prev - 1, -1));
         }
     };
 
@@ -187,16 +227,23 @@ export default function SearchLocationBar({ onSelect, onQueryChange, defaultValu
                     role="combobox"
                     aria-expanded={results.length > 0}
                     aria-haspopup="listbox"
-                    aria-autocomplete="list"
+                    aria-autocomplete="none"
                     aria-controls={listId}
                     aria-activedescendant={activeOptionId}
                     placeholder=" "
                     value={query}
-                    onChange={(e) => handleSearch(e.target.value)}
+                    onChange={(e) => handleQueryChange(e.target.value)}
                     onKeyDown={handleKeyDown}
                 />
                 <label htmlFor={inputId} className="text-field__label">{fieldLabel}</label>
             </div>
+            <button
+                type="button"
+                onClick={() => void handleSearch()}
+                disabled={loading || query.trim().length < 2}
+            >
+                {loading ? "Searching..." : "Search"}
+            </button>
             {loading && <span className="loading-message">Searching...</span>}
             {!loading && noResults && (
                 <p className="search-no-results">No locations found. Try a different keyword.</p>
